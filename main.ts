@@ -55,7 +55,7 @@ class Agent {
                   text: conversation
                     .map((m) => `${m.role}: ${m.content}`)
                     .join("\n"),
-                }, // Send the conversation as input text
+                },
               ],
             },
           ],
@@ -68,8 +68,11 @@ class Agent {
       );
 
       console.log("Gemini API Response:", res.data);
-      const contentBlock = res.data?.candidates?.[0]?.content?.[0]?.text;
-      return contentBlock ?? null;
+      const contentParts = res.data?.candidates?.[0]?.content?.parts;
+      const contentText = contentParts
+        ?.map((part: any) => part.text)
+        .join("\n");
+      return contentText ?? null;
     } catch (err: any) {
       console.error("Inference error:", err.response?.data || err.message);
       return null;
