@@ -2,6 +2,10 @@ import axios from "axios";
 import readline from "readline";
 import dotenv from "dotenv";
 import chalk from "chalk";
+import * as tools from "./Tools";
+import { SYSTEM_PROMPT } from "./systemPrompt";
+import { agentLoop } from "./agent/agentLoop";
+//import { generateLasagnaRecipe } from "./agent/example_vercel_sdk";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -21,6 +25,7 @@ class Agent {
     this.getUserMessage = getUserMessage;
   }
 
+  /*  
   public async run(): Promise<void> {
     console.log("Chat with Gemini (use ctrl-c to quit)");
 
@@ -41,9 +46,24 @@ class Agent {
       console.log(chalk.yellow("Gemini") + ": " + response);
     }
   }
+*/
+
+  public async run(): Promise<void> {
+    // main.ts (inside agent.run())
+
+    const userInput = await this.getUserMessage();
+    if (!userInput) return;
+
+    await agentLoop(userInput); // Use the agent loop here
+  }
 
   private async runInference(conversation: Message[]): Promise<string | null> {
     try {
+      const messagesWithSystemPrompt = [
+        { role: "user", content: SYSTEM_PROMPT }, // Injected system prompt
+        ...conversation,
+      ];
+
       const res = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process
           .env.GEMINI_API_KEY!}`,
@@ -52,7 +72,7 @@ class Agent {
             {
               parts: [
                 {
-                  text: conversation
+                  text: messagesWithSystemPrompt
                     .map((m) => `${m.role}: ${m.content}`)
                     .join("\n"),
                 },
@@ -67,7 +87,6 @@ class Agent {
         }
       );
 
-      console.log("Gemini API Response:", res.data);
       const contentParts = res.data?.candidates?.[0]?.content?.parts;
       const contentText = contentParts
         ?.map((part: any) => part.text)
@@ -95,8 +114,26 @@ function getUserInput(): Promise<string | null> {
   });
 }
 
+export async function runTool(toolName: string, args: any): Promise<string> {
+  if (toolName in tools) {
+    try {
+      const result = await (tools as any)[toolName](...args);
+      return typeof result === "string"
+        ? result
+        : JSON.stringify(result, null, 2);
+    } catch (err: any) {
+      return `Error running tool ${toolName}: ${err.message}`;
+    }
+  } else {
+    return `Tool "${toolName}" not found.`;
+  }
+}
+
 // Run the agent
+
 (async () => {
+  console.log(" Notion Agent started. Ask me something:");
   const agent = new Agent(getUserInput);
   await agent.run();
+  //generateLasagnaRecipe();
 })();
