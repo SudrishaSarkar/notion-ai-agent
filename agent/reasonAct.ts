@@ -2,7 +2,6 @@
 import axios from "axios";
 import { SYSTEM_PROMPT } from "../systemPrompt";
 import { google } from "@ai-sdk/google";
-import { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
 import { generateText, tool } from "ai";
 import { z } from "zod";
 import { addPage } from "../Tools/add_page";
@@ -25,8 +24,8 @@ import {
 export async function reasonAndAct(
   query: string
 ): Promise<{ output: string; toolCallSummary: string }> {
-  //const prompt = `${SYSTEM_PROMPT}\n\nUser Query:\n${query}`;
-  const prompt = query;
+  const prompt = `${SYSTEM_PROMPT}\n\nUser Query:\n${query}`;
+  //const prompt = query;
   const { text } = await generateText({
     model: google("gemini-2.0-flash"),
     prompt,
@@ -176,6 +175,11 @@ export async function reasonAndAct(
     },
   });
   console.log("Gemini Output:", text);
+  //throw new Error("Sudrisha's special error message");
+  return {
+    output: text || "No response",
+    toolCallSummary: "No structured tools used yet", // You can refine this later
+  };
   //   const res = await axios.post(
   //     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
   //     {
@@ -186,7 +190,6 @@ export async function reasonAndAct(
   //     }
   //   );
 
-  throw new Error("Sudrisha's special error message");
   //   const output =
   //     res.data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
   //   const toolCallSummary = "Simulated summary of tool used here"; // Optional: parse or extract if needed
