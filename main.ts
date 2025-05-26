@@ -114,10 +114,18 @@ function getUserInput(): Promise<string | null> {
   });
 }
 
+console.log("Available tools:", Object.keys(tools));
+// Function to run a tool based on its name and arguments
+
 export async function runTool(toolName: string, args: any): Promise<string> {
+  console.log(
+    `Running tool "${toolName}" with args:`,
+    JSON.stringify(args, null, 2)
+  );
+
   if (toolName in tools) {
     try {
-      const result = await (tools as any)[toolName](...args);
+      const result = await (tools as any)[toolName](args);
       return typeof result === "string"
         ? result
         : JSON.stringify(result, null, 2);
@@ -127,6 +135,10 @@ export async function runTool(toolName: string, args: any): Promise<string> {
   } else {
     return `Tool "${toolName}" not found.`;
   }
+}
+
+function toCamelCase(snake: string): string {
+  return snake.replace(/_([a-z])/g, (_, char) => char.toUpperCase());
 }
 
 // Run the agent

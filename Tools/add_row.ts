@@ -30,8 +30,8 @@ export async function addRow(
 
 if (require.main === module) {
   (async () => {
-    const result = await addRow("your_database_id_here", {
-      Name: {
+    const result = await addRow("1f3f1f8ba66b8081a139fc10f00c29d5", {
+      GoalName: {
         title: [
           {
             text: {

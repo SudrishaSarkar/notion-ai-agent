@@ -1,20 +1,24 @@
-export function extractToolCall(
-  text: string
-): { tool: string; args: any[] } | null {
-  // Normalize: remove markdown/code block formatting if present
-  const cleanText = text.replace(/```(?:json)?|```/g, "").trim();
-
-  const match = cleanText.match(/call\s+(\w+)\(([\s\S]*?)\)/i);
-  if (!match) return null;
-
-  const tool = match[1];
-  const rawArgs = match[2];
-
+export function extractToolCall(text: string): {
+  tool: string | null;
+  tool_input: any;
+  final_response: string | null;
+} | null {
   try {
-    const args = JSON.parse(`[${rawArgs}]`);
-    return { tool, args };
-  } catch (error: any) {
-    console.error(" Argument parsing error in extractToolCall:", error.message);
+    // Get the first JSON block inside ```json ... ``` or raw
+    const match =
+      text.match(/```json([\s\S]*?)```/) || text.match(/({[\s\S]*})/);
+    if (!match) return null;
+
+    const jsonText = match[1].trim();
+    const parsed = JSON.parse(jsonText);
+
+    return {
+      tool: parsed.tool ?? null,
+      tool_input: parsed.tool_input ?? {},
+      final_response: parsed.final_response ?? null,
+    };
+  } catch (e) {
+    console.error("❌ Failed to parse tool call JSON:", e);
     return null;
   }
 }

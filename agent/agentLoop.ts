@@ -9,32 +9,39 @@ export async function agentLoop(query: string, maxSteps = 5): Promise<void> {
   let step = 0;
 
   while (step < maxSteps) {
-    console.log(`\n Step ${step + 1}: Reasoning and Acting`);
+    console.log(`\n🧠 Step ${step + 1}: Reasoning and Acting`);
     const { output, toolCallSummary } = await reasonAndAct(currentQuery);
 
     console.log("Gemini Output:", output);
-    console.log(" Tool Call Summary:", toolCallSummary);
+    console.log("🔧 Tool Call Summary:", toolCallSummary);
 
     const toolCall = extractToolCall(output);
 
-    if (toolCall) {
-      const { tool, args } = toolCall;
-      console.log(` Detected tool call: ${tool}(${JSON.stringify(args)})`);
+    if (toolCall?.tool) {
+      const toolName = toolCall.tool;
+      const toolInput = toolCall.tool_input || {};
+      console.log(
+        `🛠️ Detected tool call: ${toolName}(${JSON.stringify(toolInput)})`
+      );
 
-      const toolResult = await runTool(tool, args);
-      console.log(`Tool Result: ${toolResult}`);
+      // Tool execution — flatten tool_input to an argument array if needed
+      const result = await runTool(toolName, [
+        toolInput.database_id,
+        toolInput.properties || {},
+      ]);
+      console.log("✅ Tool Result:", result);
 
-      currentQuery = `Previous tool result:\n${toolResult}`; // feed result back into next loop
+      currentQuery = `Tool result: ${result}`; // Pass tool result as next query
     } else {
       console.log(
-        " No tool call found. Passing output directly into next step."
+        "⚠️ No tool call found. Passing output directly into next step."
       );
       currentQuery = output;
     }
 
     const { done, nextQuery } = reflect(currentQuery, step, maxSteps);
     if (done) {
-      console.log(" Task complete. Exiting.");
+      console.log("✅ Task complete. Exiting.");
       break;
     }
 
@@ -43,6 +50,6 @@ export async function agentLoop(query: string, maxSteps = 5): Promise<void> {
   }
 
   if (step >= maxSteps) {
-    console.log(" Max steps reached. Exiting.");
+    console.log("⚠️ Max steps reached. Exiting.");
   }
 }

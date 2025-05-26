@@ -39,6 +39,28 @@ Respond ONLY in the following format:
 
 ---
 
+Here is an example of how to use the tools:
+{
+  "thoughts": "The user wants to add a goal called 'Study LeetCode' to the database 'Goals Tracker'. I will get the database_id and use add_row with appropriate properties.",
+  "tool": "add_row",
+  "tool_input": {
+    "database_id": "abc123",
+    "properties": {
+      "GoalName": {
+        "title": [
+          {
+            "text": {
+              "content": "Study LeetCode"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "final_response": null
+}
+
+
 ###  Guidance:
 
 - Choose tools that best match the user's intent.

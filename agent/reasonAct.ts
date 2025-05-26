@@ -48,15 +48,21 @@ export async function reasonAndAct(
           return await addDataToDatabase(database_id, properties);
         },
       }),
-      get_database_id: tool({
+      getDatabaseIdByName: tool({
         description: "Fetches the database_id from a given database_name.",
         parameters: z.object({
-          database_name: z.string().describe("The name of the database"),
+          database_name: z.string().min(1, "database_name is required"),
         }),
         execute: async ({ database_name }) => {
+          if (!database_name || typeof database_name !== "string") {
+            throw new Error(
+              "Invalid database_name input: must be a non-empty string."
+            );
+          }
           return await getDatabaseIdByName(database_name);
         },
       }),
+
       get_column_list: tool({
         description: "Lists columns in a given database.",
         parameters: z.object({
@@ -93,18 +99,18 @@ export async function reasonAndAct(
         },
       }),
       add_row: tool({
-        description: "Adds a row to a database.",
+        description: "Adds a new row to a database.",
         parameters: z.object({
-          database_id: z.string().optional(),
-          properties: z.string().optional(),
+          database_id: z.string(),
+          properties: z
+            .any()
+            .describe("Notion-style property object (e.g. GoalName)"),
         }),
         execute: async ({ database_id, properties }) => {
-          if (typeof database_id !== "string") {
-            throw new Error("database_id must be provided as a string.");
-          }
           return await addRow(database_id, properties);
         },
       }),
+
       delete_row: tool({
         description: "Deletes a row in a database.",
         parameters: z.object({
