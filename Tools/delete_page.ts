@@ -1,5 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { generateText, tool } from "ai";
+import { z } from "zod";
 dotenv.config();
 
 const notion = axios.create({
@@ -11,7 +13,20 @@ const notion = axios.create({
   },
 });
 
-export async function deletePage(pageId: string): Promise<string> {
+export const deletePage = tool({
+  description: "Deletes a page from the workspace.",
+  parameters: z.object({
+    pageId: z.string().optional(),
+  }),
+  execute: async ({ pageId }) => {
+    if (typeof pageId !== "string") {
+      throw new Error("pageId must be provided as a string.");
+    }
+    return await deletePageLogic(pageId);
+  },
+});
+
+async function deletePageLogic(pageId: string): Promise<string> {
   try {
     await notion.patch(`pages/${pageId}`, {
       archived: true,

@@ -8,16 +8,9 @@ You follow this cycle:
 - Reflect on the result and decide next steps
 - Exit when the goal is complete
 
-Respond ONLY in the following format:
+General Information about interpreting user queries:
+- If the user 
 
-\`\`\`json
-{
-  "thoughts": "What you're thinking and planning to do",
-  "tool": "tool_name or null if you're just replying naturally",
-  "tool_input": { "key": "value" }, // if applicable
-  "final_response": "null if using a tool; otherwise your final answer to the user"
-}
-\`\`\`
 
 ---
 
@@ -38,27 +31,6 @@ Respond ONLY in the following format:
 13. **search_data**  Searches workspace. Input: \`query\` string
 
 ---
-
-Here is an example of how to use the tools:
-{
-  "thoughts": "The user wants to add a goal called 'Study LeetCode' to the database 'Goals Tracker'. I will get the database_id and use add_row with appropriate properties.",
-  "tool": "add_row",
-  "tool_input": {
-    "database_id": "abc123",
-    "properties": {
-      "GoalName": {
-        "title": [
-          {
-            "text": {
-              "content": "Study LeetCode"
-            }
-          }
-        ]
-      }
-    }
-  },
-  "final_response": null
-}
 
 
 ###  Guidance:

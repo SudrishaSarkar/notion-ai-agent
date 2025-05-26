@@ -5,6 +5,7 @@ import chalk from "chalk";
 import * as tools from "./Tools";
 import { SYSTEM_PROMPT } from "./systemPrompt";
 import { agentLoop } from "./agent/agentLoop";
+import { runAgent } from "./agent/agentLogic";
 //import { generateLasagnaRecipe } from "./agent/example_vercel_sdk";
 
 // Load environment variables from .env file
@@ -114,7 +115,7 @@ function getUserInput(): Promise<string | null> {
   });
 }
 
-console.log("Available tools:", Object.keys(tools));
+//console.log("Available tools:", Object.keys(tools));
 // Function to run a tool based on its name and arguments
 
 export async function runTool(toolName: string, args: any): Promise<string> {
@@ -145,7 +146,8 @@ function toCamelCase(snake: string): string {
 
 (async () => {
   console.log(" Notion Agent started. Ask me something:");
-  const agent = new Agent(getUserInput);
-  await agent.run();
+  // const agent = new Agent(getUserInput);
+  // await agent.run();
   //generateLasagnaRecipe();
+  await runAgent();
 })();

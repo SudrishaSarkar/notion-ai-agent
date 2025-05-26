@@ -29,6 +29,7 @@ export async function reasonAndAct(
   const { text } = await generateText({
     model: google("gemini-2.0-flash"),
     prompt,
+    maxSteps: 5,
     tools: {
       list_all_databases: tool({
         description: "Lists all existing databases.",
