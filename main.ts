@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import chalk from "chalk";
 import * as tools from "./Tools";
 import { SYSTEM_PROMPT } from "./systemPrompt";
-import { agentLoop } from "./agent/agentLoop";
+//import { agentLoop } from "./agent/agentLoop";
 import { runAgent } from "./agent/agentLogic";
 //import { generateLasagnaRecipe } from "./agent/example_vercel_sdk";
 
@@ -49,14 +49,14 @@ class Agent {
   }
 */
 
-  public async run(): Promise<void> {
-    // main.ts (inside agent.run())
+  // public async run(): Promise<void> {
+  //   // main.ts (inside agent.run())
 
-    const userInput = await this.getUserMessage();
-    if (!userInput) return;
+  //   const userInput = await this.getUserMessage();
+  //   if (!userInput) return;
 
-    await agentLoop(userInput); // Use the agent loop here
-  }
+  //   await agentLoop(userInput); // Use the agent loop here
+  // }
 
   private async runInference(conversation: Message[]): Promise<string | null> {
     try {
@@ -143,11 +143,22 @@ function toCamelCase(snake: string): string {
 }
 
 // Run the agent
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 (async () => {
-  console.log(" Notion Agent started. Ask me something:");
+  //console.log(" Notion Agent started. Ask me something:");
   // const agent = new Agent(getUserInput);
   // await agent.run();
   //generateLasagnaRecipe();
-  await runAgent();
+  //await runAgent();
+  rl.question(
+    "Notion Agent started. Ask me something:\n",
+    async (userInput) => {
+      await runAgent(userInput);
+      rl.close();
+    }
+  );
 })();

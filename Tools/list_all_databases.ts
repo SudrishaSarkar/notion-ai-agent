@@ -1,6 +1,8 @@
 // tools/list_all_databases.ts
 import axios from "axios";
 import dotenv from "dotenv";
+import { generateText, tool } from "ai";
+import { z } from "zod";
 dotenv.config();
 
 const notion = axios.create({
@@ -12,7 +14,15 @@ const notion = axios.create({
   },
 });
 
-export async function listAllDatabases(): Promise<any> {
+export const listAllDatabases = tool({
+  description: "Lists all existing databases.",
+  parameters: z.object({}),
+  execute: async () => {
+    return await listAllDatabasesLogic();
+  },
+});
+
+async function listAllDatabasesLogic(): Promise<any> {
   try {
     const response = await notion.post("search", {
       filter: {
@@ -34,7 +44,7 @@ export async function listAllDatabases(): Promise<any> {
 // Optional: Example usage when running the file directly
 if (require.main === module) {
   (async () => {
-    const databases = await listAllDatabases();
+    const databases = await listAllDatabasesLogic();
     console.log(JSON.stringify(databases, null, 2));
   })();
 }

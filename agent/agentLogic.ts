@@ -1,7 +1,21 @@
 import { generateText, tool } from "ai";
 import { z } from "zod";
 import { google } from "@ai-sdk/google";
-import { deletePage } from "../Tools";
+import { SYSTEM_PROMPT } from "../systemPrompt";
+import {
+  addColumn,
+  addDataToDatabase,
+  addPage,
+  addRow,
+  deleteColumn,
+  deletePage,
+  deleteRow,
+  getColumnList,
+  getDatabaseIdByName,
+  listAllDatabases,
+  searchData,
+  setName,
+} from "../Tools";
 
 // ✅ TOOL 1: Say Hello
 // This tool greets a user by name
@@ -28,7 +42,10 @@ const ageTool = tool({
 });
 
 // ✅ MAIN AGENT FUNCTION
-export async function runAgent() {
+export async function runAgent(
+  query: string
+): Promise<{ output: string; toolCallSummary: string }> {
+  const prompt = `${SYSTEM_PROMPT}\n\nUser Query:\n${query}`;
   const { text, steps } = await generateText({
     // 👇 Language model to use (can be Claude, OpenAI, etc.)
     model: google("gemini-2.0-flash"), // or openai("gpt-4o") if you're importing from @ai-sdk/openai
@@ -37,12 +54,23 @@ export async function runAgent() {
     tools: {
       greet: greetTool,
       tellAge: ageTool,
-      deletePage: deletePage, // Example tool for deleting a page
+      deletePage: deletePage,
+      listAllDatabases: listAllDatabases,
+      addColumn: addColumn,
+      addDataToDatabase: addDataToDatabase,
+      addPage: addPage,
+      addRow: addRow,
+      deleteColumn: deleteColumn,
+      deleteRow: deleteRow,
+      getColumnList: getColumnList,
+      getDatabaseIdByName: getDatabaseIdByName,
+      searchData: searchData,
+      setName: setName,
     },
 
     // 👇 Prompt to the agent
     // Ask it something that requires using tools
-    prompt: "Greet John and tell him he is 25 years old.",
+    prompt,
 
     // 👇 Allow multiple steps (tool call → result → next reasoning)
     maxSteps: 5,
@@ -70,4 +98,17 @@ export async function runAgent() {
       console.log("  Text generated:", step.text);
     }
   }
+
+  // Return the required object to match the function's return type
+  return {
+    output: text,
+    toolCallSummary: steps
+      .map(
+        (step, i) =>
+          `Step ${i + 1}: Tools called: ${
+            step.toolCalls?.map((tc) => tc.toolName).join(", ") || "None"
+          }`
+      )
+      .join("\n"),
+  };
 }

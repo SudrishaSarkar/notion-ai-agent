@@ -1,8 +1,25 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { generateText, tool } from "ai";
+import { z } from "zod";
 dotenv.config();
 
-export async function getDatabaseIdByName(database_name: string) {
+export const getDatabaseIdByName = tool({
+  description: "Fetches the database_id from a given database_name.",
+  parameters: z.object({
+    database_name: z.string().min(1, "database_name is required"),
+  }),
+  execute: async ({ database_name }) => {
+    if (!database_name || typeof database_name !== "string") {
+      throw new Error(
+        "Invalid database_name input: must be a non-empty string."
+      );
+    }
+    return await getDatabaseIdByNameLogic(database_name);
+  },
+});
+
+async function getDatabaseIdByNameLogic(database_name: string) {
   if (!database_name || typeof database_name !== "string") {
     console.error("❌ Invalid database_name input:", database_name);
     throw new Error("Invalid database_name input: must be a non-empty string.");

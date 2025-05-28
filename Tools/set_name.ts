@@ -1,5 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { generateText, tool } from "ai";
+import { z } from "zod";
 dotenv.config();
 
 const notion = axios.create({
@@ -11,7 +13,21 @@ const notion = axios.create({
   },
 });
 
-export async function setName(
+export const setName = tool({
+  description: "Updates the name of a page, row, or column.",
+  parameters: z.object({
+    pageId: z.string().optional(),
+    newName: z.string().optional(),
+  }),
+  execute: async ({ pageId, newName }) => {
+    if (typeof pageId !== "string" || typeof newName !== "string") {
+      throw new Error("Both pageId and newName must be provided as strings.");
+    }
+    return await setNameLogic(pageId, newName);
+  },
+});
+
+export async function setNameLogic(
   pageId: string,
   newName: string
 ): Promise<string> {

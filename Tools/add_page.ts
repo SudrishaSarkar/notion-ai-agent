@@ -1,5 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { generateText, tool } from "ai";
+import { z } from "zod";
 dotenv.config();
 
 const notion = axios.create({
@@ -11,7 +13,17 @@ const notion = axios.create({
   },
 });
 
-export async function addPage(title: string): Promise<string> {
+export const addPage = tool({
+  description: "Adds a new page to the workspace.",
+  parameters: z.object({
+    page_name: z.string().describe("The name of the page to add"),
+  }),
+  execute: async ({ page_name }) => {
+    return await addPageLogic(page_name);
+  },
+});
+
+export async function addPageLogic(title: string): Promise<string> {
   try {
     const response = await notion.post("pages", {
       parent: { type: "workspace" },

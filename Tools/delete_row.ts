@@ -1,5 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { generateText, tool } from "ai";
+import { z } from "zod";
 dotenv.config();
 
 const notion = axios.create({
@@ -11,7 +13,20 @@ const notion = axios.create({
   },
 });
 
-export async function deleteRow(pageId: string): Promise<string> {
+export const deleteRow = tool({
+  description: "Deletes a row in a database.",
+  parameters: z.object({
+    database_id: z.string().optional(),
+  }),
+  execute: async ({ database_id }) => {
+    if (typeof database_id !== "string") {
+      throw new Error("database_id must be provided as a string.");
+    }
+    return await deleteRowLogic(database_id);
+  },
+});
+
+export async function deleteRowLogic(pageId: string): Promise<string> {
   try {
     await notion.patch(`pages/${pageId}`, {
       archived: true,

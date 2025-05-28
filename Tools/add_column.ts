@@ -1,8 +1,22 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { generateText, tool } from "ai";
+import { z } from "zod";
 dotenv.config();
 
-export async function addColumn(
+export const addColumn = tool({
+  description: "Adds a column to a database.",
+  parameters: z.object({
+    database_id: z.string().describe("The database ID to add column to"),
+    columnName: z.string().describe("The name of the new column"),
+    columnType: z.string().describe("The type of the new column"),
+  }),
+  execute: async ({ database_id, columnName, columnType }) => {
+    return await addColumnLogic(database_id, columnName, columnType);
+  },
+});
+
+export async function addColumnLogic(
   database_id: string,
   columnName: string,
   columnType: string

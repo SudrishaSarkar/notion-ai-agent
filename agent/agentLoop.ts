@@ -1,55 +1,55 @@
-// agent/agentLoop.ts
-import { reasonAndAct } from "./reasonAct";
-import { reflect } from "./reflect";
-import { extractToolCall } from "./extractToolCall";
-import { runTool } from "../main"; // Or wherever runTool is defined/exported
+// // agent/agentLoop.ts
+// import { reasonAndAct } from "./reasonAct";
+// import { reflect } from "./reflect";
+// import { extractToolCall } from "./extractToolCall";
+// import { runTool } from "../main"; // Or wherever runTool is defined/exported
 
-export async function agentLoop(query: string, maxSteps = 5): Promise<void> {
-  let currentQuery = query;
-  let step = 0;
+// export async function agentLoop(query: string, maxSteps = 5): Promise<void> {
+//   let currentQuery = query;
+//   let step = 0;
 
-  while (step < maxSteps) {
-    console.log(`\n🧠 Step ${step + 1}: Reasoning and Acting`);
-    const { output, toolCallSummary } = await reasonAndAct(currentQuery);
+//   while (step < maxSteps) {
+//     console.log(`\n🧠 Step ${step + 1}: Reasoning and Acting`);
+//     const { output, toolCallSummary } = await reasonAndAct(currentQuery);
 
-    console.log("Gemini Output:", output);
-    console.log("🔧 Tool Call Summary:", toolCallSummary);
+//     console.log("Gemini Output:", output);
+//     console.log("🔧 Tool Call Summary:", toolCallSummary);
 
-    const toolCall = extractToolCall(output);
+//     const toolCall = extractToolCall(output);
 
-    if (toolCall?.tool) {
-      const toolName = toolCall.tool;
-      const toolInput = toolCall.tool_input || {};
-      console.log(
-        `🛠️ Detected tool call: ${toolName}(${JSON.stringify(toolInput)})`
-      );
+//     if (toolCall?.tool) {
+//       const toolName = toolCall.tool;
+//       const toolInput = toolCall.tool_input || {};
+//       console.log(
+//         `🛠️ Detected tool call: ${toolName}(${JSON.stringify(toolInput)})`
+//       );
 
-      // Tool execution — flatten tool_input to an argument array if needed
-      const result = await runTool(toolName, [
-        toolInput.database_id,
-        toolInput.properties || {},
-      ]);
-      console.log("✅ Tool Result:", result);
+//       // Tool execution — flatten tool_input to an argument array if needed
+//       const result = await runTool(toolName, [
+//         toolInput.database_id,
+//         toolInput.properties || {},
+//       ]);
+//       console.log("✅ Tool Result:", result);
 
-      currentQuery = `Tool result: ${result}`; // Pass tool result as next query
-    } else {
-      console.log(
-        "⚠️ No tool call found. Passing output directly into next step."
-      );
-      currentQuery = output;
-    }
+//       currentQuery = `Tool result: ${result}`; // Pass tool result as next query
+//     } else {
+//       console.log(
+//         "⚠️ No tool call found. Passing output directly into next step."
+//       );
+//       currentQuery = output;
+//     }
 
-    const { done, nextQuery } = reflect(currentQuery, step, maxSteps);
-    if (done) {
-      console.log("✅ Task complete. Exiting.");
-      break;
-    }
+//     const { done, nextQuery } = reflect(currentQuery, step, maxSteps);
+//     if (done) {
+//       console.log("✅ Task complete. Exiting.");
+//       break;
+//     }
 
-    currentQuery = nextQuery;
-    step++;
-  }
+//     currentQuery = nextQuery;
+//     step++;
+//   }
 
-  if (step >= maxSteps) {
-    console.log("⚠️ Max steps reached. Exiting.");
-  }
-}
+//   if (step >= maxSteps) {
+//     console.log("⚠️ Max steps reached. Exiting.");
+//   }
+// }
