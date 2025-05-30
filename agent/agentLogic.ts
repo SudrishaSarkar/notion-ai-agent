@@ -16,6 +16,7 @@ import {
   searchData,
   setName,
 } from "../Tools";
+import { updateRow } from "../Tools/updateRow";
 
 // ✅ TOOL 1: Say Hello
 // This tool greets a user by name
@@ -66,6 +67,7 @@ export async function runAgent(
       getDatabaseIdByName: getDatabaseIdByName,
       searchData: searchData,
       setName: setName,
+      updateRow: updateRow,
     },
 
     // 👇 Prompt to the agent

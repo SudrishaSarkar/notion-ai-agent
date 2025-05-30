@@ -1,7 +1,7 @@
 // tools/list_rows.ts
 import axios from "axios";
 import dotenv from "dotenv";
-import { generateText, tool } from "ai";
+import { tool } from "ai";
 import { z } from "zod";
 dotenv.config();
 
@@ -15,21 +15,45 @@ const notion = axios.create({
 });
 
 export const listRows = tool({
-  description: "Lists rows in a database.",
+  description:
+    "Lists rows in a database. Can optionally filter by property name and value.",
   parameters: z.object({
-    databaseId: z.string().optional(),
+    databaseId: z.string(),
+    filterProperty: z
+      .string()
+      .optional()
+      .describe("Name of the property to filter by"),
+    filterValue: z
+      .string()
+      .optional()
+      .describe("Value of the property to filter by"),
   }),
-  execute: async ({ databaseId }) => {
-    if (typeof databaseId !== "string") {
-      throw new Error("databaseId must be provided as a string.");
-    }
-    return await listRowsLogic(databaseId);
+  execute: async ({ databaseId, filterProperty, filterValue }) => {
+    return await listRowsLogic(databaseId, filterProperty, filterValue);
   },
 });
 
-export async function listRowsLogic(databaseId: string): Promise<any> {
+export async function listRowsLogic(
+  databaseId: string,
+  filterProperty?: string,
+  filterValue?: string
+): Promise<any> {
   try {
-    const response = await notion.post(`databases/${databaseId}/query`);
+    const payload: any = {};
+
+    if (filterProperty && filterValue) {
+      payload.filter = {
+        property: filterProperty,
+        select: {
+          equals: filterValue,
+        },
+      };
+    }
+
+    const response = await notion.post(
+      `databases/${databaseId}/query`,
+      payload
+    );
     return response.data.results;
   } catch (error: any) {
     console.error(
@@ -42,7 +66,11 @@ export async function listRowsLogic(databaseId: string): Promise<any> {
 
 if (require.main === module) {
   (async () => {
-    const rows = await listRowsLogic("your_database_id_here");
+    const rows = await listRowsLogic(
+      "your_database_id_here",
+      "Priority",
+      "Medium"
+    );
     console.log(JSON.stringify(rows, null, 2));
   })();
 }

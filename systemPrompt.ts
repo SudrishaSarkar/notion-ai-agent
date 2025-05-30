@@ -43,7 +43,8 @@ Always pass the cleaned-up name to getDatabaseIdByName.
 }
 
 6. If a tool like getDatabaseIdByName fails because the name wasn’t found, use searchData as a fallback to locate a matching database by fuzzy name or keyword.
-
+7. If a user asks to list items filtered by a property (e.g., Priority, Status), call \`listRows\` with appropriate filters. Only use filter when both property name and value are specified.
+8. If the user asks to update or change a property of a row (e.g., "Change the status of my goal to In Progress"), don't create a new row to change the property. Modify the property of the existing row using the \`updateRow\` tool instead.
 ---
 
 ###  Available Tools:
@@ -53,7 +54,26 @@ Always pass the cleaned-up name to getDatabaseIdByName.
 3. **getDatabaseId**  Gets database ID from its name. Input: \`database_name\`
 4. **getColumnList**  Lists column names. Input: \`database_id\` or \`database_name\`
 5. **addColumn** Adds column to a database. Input: \`database_id\`
-6. **listRows**  Lists rows. Input: \`database_id\` or \`database_name\`
+6. **listRows** — Lists rows in a database. Inputs:
+  - **databaseId** (string) — Required
+  - **filterProperty** (string) — Optional. The name of the property to filter by (e.g. "Priority").
+  - **filterValue** (string) — Optional. The value to match for that property (e.g. "Medium").
+
+// Add this to the reasoning rules section:
+- If the user asks to list rows filtered by a column (e.g. “show all goals with Priority set to Medium”), use **getDatabaseIdByName** to get the **databaseId**, then use **listRows** with the **filterProperty** and **filterValue** set accordingly.
+- Do not use **searchData** to find filtered rows in databases — use **listRows** instead.
+- Do not skip filters if the user query clearly includes them.
+
+Example:
+User: "Show all goals in Goal Tracker with priority Medium"
+→ First call **getDatabaseIdByName** with "Goal Tracker"
+→ Then call **listRows** with:
+{
+  databaseId: "the_id_you_got",
+  filterProperty: "Priority",
+  filterValue: "Medium"
+}
+
 7. **addRow**  Adds a new row. Input: \`database_id\` or \`database_name\`
 8. **deleteRow**  Deletes a row. Input: \`database_id\` or \`database_name\`
 9. **deleteColumn**  Deletes a column. Input: \`database_id\` or \`database_name\`
@@ -61,6 +81,7 @@ Always pass the cleaned-up name to getDatabaseIdByName.
 11. **deletePage**  Deletes a page. Input: \`database_id\` or \`database_name\`
 12. **setName**  Renames any Notion entity. Input: \`database_id\` or \`database_name\`
 13. **searchData**  Searches workspace. Input: \`query\` string
+14. **updateRow**  Updates properties of an existing Notion page (row). Input: \`page_id\` and \`properties\` object
 
 ---
 
